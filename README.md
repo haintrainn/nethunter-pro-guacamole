@@ -27,7 +27,7 @@ Developed and tested on a GM1911 (India).
 | App store (Software + Flathub) | Works (v0.2) | |
 | USB OTG (host mode) | Separate boot image | Swap boot image to use USB Wi-Fi adapters etc. |
 | Modem firmware | Loads | Calls/SMS/mobile data untested |
-| Bluetooth | Works (after v0.2) | WCN3990 over UART: scanning tested. Bluetooth audio needs audio support, which is missing. Suspend with Bluetooth on is untested |
+| Bluetooth | Works (after v0.2) | WCN3990 over UART: scanning and pairing tested. Bluetooth audio needs audio support, which is missing. Suspend with Bluetooth on is untested |
 | Audio, camera, sensors, fingerprint | Not working | |
 
 Performance: v0.1 has no GPU driver, so the CPU draws every frame of a
