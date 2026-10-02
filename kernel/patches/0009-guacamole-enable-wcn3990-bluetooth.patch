@@ -1,0 +1,82 @@
+--- a/arch/arm64/boot/dts/qcom/sm8150-oneplus-guacamole.dts
++++ b/arch/arm64/boot/dts/qcom/sm8150-oneplus-guacamole.dts
+@@ -22,6 +22,8 @@
+ 
+ 	aliases {
+ 		display0 = &framebuffer0;
++		/* Bluetooth UART: qcom_geni_serial needs an alias to probe */
++		serial1 = &uart13;
+ 	};
+ 
+ 	/* Physical size for simpledrm (6.67", 1440x3120); defaults to 96 DPI */
+@@ -210,6 +212,70 @@
+ };
+ 
+ /*
++ * WCN3990 Bluetooth on the 4-wire UART at 0xc8c000 (QUP SE13, GPIO 43-46),
++ * supplies as in the downstream 18821 bt_wcn3990 node. After the OnePlus 7T
++ * Pro (hotdog) mainline port by Robin Snyders, which has the same wiring.
++ */
++&tlmm {
++	qup_uart13_sleep: qup-uart13-sleep-state {
++		pinmux {
++			pins = "gpio43", "gpio44", "gpio45", "gpio46";
++			function = "gpio";
++		};
++
++		cts-pins {
++			pins = "gpio43";
++			drive-strength = <2>;
++			bias-disable;
++		};
++
++		rts-pins {
++			pins = "gpio44";
++			drive-strength = <2>;
++			bias-pull-down;
++		};
++
++		tx-pins {
++			pins = "gpio45";
++			drive-strength = <2>;
++			bias-pull-up;
++		};
++
++		rx-pins {
++			pins = "gpio46";
++			drive-strength = <2>;
++			bias-disable;
++		};
++	};
++};
++
++&uart13 {
++	status = "okay";
++
++	/delete-property/ interrupts;
++	interrupts-extended = <&intc GIC_SPI 585 IRQ_TYPE_LEVEL_HIGH>,
++			      <&tlmm 46 IRQ_TYPE_EDGE_FALLING>;
++
++	pinctrl-names = "default", "sleep";
++	pinctrl-1 = <&qup_uart13_sleep>;
++
++	bluetooth {
++		compatible = "qcom,wcn3990-bt";
++		/*
++		 * The controller reports ROM version 0x1001, for which the
++		 * driver would ask for revision 01 files; the phone's
++		 * firmware (extracted by droid-juicer) is revision 21.
++		 */
++		firmware-name = "crnv21.bin", "crbtfw21.tlv";
++		vddio-supply = <&vreg_s4a_1p8>;
++		vddxo-supply = <&vreg_l7a_1p8>;
++		vddrf-supply = <&vreg_l2c_1p3>;
++		vddch0-supply = <&vreg_l11c_3p3>;
++		max-speed = <3200000>;
++	};
++};
++
++/*
+  * The s6sy761 driver has no reset-gpios support; hold the touch controller
+  * out of reset (active low) through its pin state instead.
+  */

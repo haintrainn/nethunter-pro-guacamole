@@ -27,7 +27,8 @@ Developed and tested on a GM1911 (India).
 | App store (Software + Flathub) | Works (v0.2) | |
 | USB OTG (host mode) | Separate boot image | Swap boot image to use USB Wi-Fi adapters etc. |
 | Modem firmware | Loads | Calls/SMS/mobile data untested |
-| Bluetooth, audio, camera, sensors, fingerprint | Not working | |
+| Bluetooth | Works (after v0.2) | WCN3990 over UART: scanning tested. Bluetooth audio needs audio support, which is missing. Suspend with Bluetooth on is untested |
+| Audio, camera, sensors, fingerprint | Not working | |
 
 Performance: v0.1 has no GPU driver, so the CPU draws every frame of a
 1440×3120 panel with pixman/cairo software renderers (animations off). Later
@@ -199,6 +200,7 @@ hour (most of it is installing packages under arm64 emulation).
 | `0006` | guacamole: enable the Adreno 640 GPU and its GMU (zap shader extracted by droid-juicer) and reserve a ramoops region for crash logs |
 | `0007` | msm: don't drop a reference on the *exporter's* GEM object when freeing an imported dma-buf. phoc renders on the GPU into buffers imported from simpledrm; the bad reference drop underflowed simpledrm's refcount and crashed the phone |
 | `0008` | guacamole: reserve all the memory the Android 12 firmware owns (full 85 MiB TrustZone region, XBL/AOP, secure CDSP, rmtfs guard pages), taken from the downstream device tree. Linux handing out those pages is an XPU violation: the phone reset into Qualcomm crash-dump mode with no kernel log once memory filled up — within seconds during `apt install`, at random otherwise |
+| `0009` | guacamole: enable WCN3990 Bluetooth on UART13 (GPIO 43-46) with the downstream supplies, select the revision 21 firmware extracted by droid-juicer, and give the UART the `serial1` alias the serial driver needs to probe. After the [OnePlus 7T Pro port](https://github.com/Sr-0w/hotdog-linux-bringup), which has the same wiring |
 
 `kernel/nethunter.config` switches the display to simpledrm, builds a plain
 `Image.gz` for the Android bootloader, and enables common USB Wi-Fi/serial
@@ -241,7 +243,7 @@ replaces it (and brings the bug back) until the fix is upstream.
 
 * No proper display driver (the panel is a DSC command-mode panel), so the
   GPU renders and simpledrm shows the result.
-* Bluetooth, audio, camera, sensors and fingerprint are not enabled.
+* Audio, camera, sensors and fingerprint are not enabled.
 * The USB port doesn't switch between device and host mode automatically.
 * v0.1 extracts firmware from slot a even when booted from slot b: if slot a
   has older firmware, Wi-Fi doesn't connect. Fixed after v0.1.
@@ -265,6 +267,8 @@ Contributions welcome.
   linux-wireless series (tested on the OnePlus 7T).
 * [LineageOS](https://lineageos.org) for the firmware packaging and downstream
   device trees used as reference.
+* Robin Snyders' [hotdog-linux-bringup](https://github.com/Sr-0w/hotdog-linux-bringup)
+  (OnePlus 7T Pro), the reference for the Bluetooth device-tree node.
 
 ## License
 
