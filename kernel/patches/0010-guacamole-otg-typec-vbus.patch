@@ -1,0 +1,60 @@
+--- a/arch/arm64/boot/dts/qcom/sm8150-oneplus-guacamole-otg.dts
++++ b/arch/arm64/boot/dts/qcom/sm8150-oneplus-guacamole-otg.dts
+@@ -1,11 +1,52 @@
+ // SPDX-License-Identifier: BSD-3-Clause
+-/*
+- * OnePlus 7 Pro with the USB port forced to host mode, for OTG adapters
+- * (e.g. external WiFi cards). USB gadget networking is unavailable.
+- */
++/dts-v1/;
+
++#include <dt-bindings/usb/pd.h>
+ #include "sm8150-oneplus-guacamole.dts"
+
++/* USB 2.0 OTG expérimental */
++
+ &usb_1_dwc3 {
+-	dr_mode = "host";
++    dr_mode = "otg";
++    maximum-speed = "high-speed";
++    usb-role-switch;
++};
++
++&usb_1_dwc3_hs {
++    remote-endpoint = <&typec_hs_in>;
++};
++
++&pm8150b_vbus {
++    status = "okay";
++};
++
++&pm8150b_typec {
++    status = "okay";
++    vdd-pdphy-supply = <&vreg_l2a_3p1>;
++
++    connector {
++        compatible = "usb-c-connector";
++        power-role = "dual";
++        data-role = "dual";
++        self-powered;
++
++        source-pdos = <PDO_FIXED(5000, 500,
++                                 PDO_FIXED_USB_COMM)>;
++        sink-pdos = <PDO_FIXED(5000, 500,
++                               PDO_FIXED_USB_COMM)>;
++        op-sink-microwatt = <2500000>;
++
++        ports {
++            #address-cells = <1>;
++            #size-cells = <0>;
++
++            port@0 {
++                reg = <0>;
++
++                typec_hs_in: endpoint {
++                    remote-endpoint = <&usb_1_dwc3_hs>;
++                };
++            };
++        };
++    };
+ };
