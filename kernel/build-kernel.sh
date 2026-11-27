@@ -43,6 +43,10 @@ $ENGINE run --rm -v "$HERE:/work:z" -w "/work/$SRC" "$IMAGE" sh -ec '
 	cp ../pmos/config-postmarketos-qcom-sm8150.aarch64 .config
 	scripts/kconfig/merge_config.sh -m .config ../nethunter.config
 	make olddefconfig
+	scripts/config --file .config --set-str LOCALVERSION "-sm8150-otg0010"
+	scripts/config --file .config --disable LOCALVERSION_AUTO
+	make olddefconfig
+	make syncconfig
 	# No linux-headers package: it needs a gcc cross toolchain (we use LLVM).
 	# -d: skip dpkg build-dep check (libdw-dev etc. are not needed here)
 	make -j"$(nproc)" KDEB_PKGVERSION=6.17.0-1 DPKG_FLAGS=-d \
